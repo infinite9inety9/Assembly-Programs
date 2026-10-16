@@ -5,8 +5,9 @@ title: db "Title Banner" , 0
 l1: dw 12
 paragraph: db "Well here I am solving this COAL assignment on a thursday night. I have not gotten much sleep since yesterday due to the early UHQ class. Next week seems to be a tough one with two Seasonals, three/four quizzes, and two/three assignments being due. Lets see." , 0
 l2: dw 258
-scrollN: dw 1
-findString: db "I"
+scrollN: dw 0
+findString: db "three"
+l3: dw 5
 
 clrscrn:
 push es
@@ -320,6 +321,115 @@ mov sp, bp
 pop bp
 ret 10
 
+findAndHighlight:
+push bp
+mov bp, sp
+push ax
+push bx
+push cx
+push dx
+push si
+push di
+push ds
+push es
+
+mov ax, ds
+mov es, ax
+mov si, paragraph
+
+searchLoop:
+cmp byte [si], 0
+je fhDone
+cmp si, paragraph
+je checkWord
+mov al, [si-1]
+cmp al, 'A'
+jb  leadingOk
+cmp al, 'Z'
+jbe nextChar
+cmp al, 'a'
+jb  leadingOk
+cmp al, 'z'
+jbe nextChar
+leadingOk:
+jmp checkWord
+
+checkWord:
+mov di, findString
+mov cx, [l3]
+push si
+repe cmpsb
+pop si
+jne nextChar
+mov bx, si
+add bx, [l3]
+mov al, [bx]
+cmp al, 'A'
+jb  trailingOk
+cmp al, 'Z'
+jbe nextChar
+cmp al, 'a'
+jb  trailingOk
+cmp al, 'z'
+jbe nextChar
+trailingOk:
+
+foundWord:
+mov bx, si
+sub bx, paragraph
+mov ax, bx
+xor dx, dx
+mov cx, 61
+div cx
+mov bx, dx
+mov dx, ax
+mov ax, 160
+mul dx
+push ax
+mov ax, 5
+sub ax, [scrollN]
+mov cx, 160
+mul cx
+add ax, 20
+pop dx
+add ax, dx
+add ax, bx
+add ax, bx
+mov di, ax
+push 0xb800
+pop es
+mov cx, [l3]
+hlLoop:
+mov byte [es:di+1], 0CEh
+add di, 2
+inc bx
+cmp bx, 61
+jne hlNoWrap
+xor bx, bx
+add di, 38
+hlNoWrap:
+loop hlLoop
+mov ax, ds
+mov es, ax
+
+nextChar:
+inc si
+jmp searchLoop
+
+fhDone:
+pop es
+pop ds
+pop di
+pop si
+pop dx
+pop cx
+pop bx
+pop ax
+pop bp
+ret 6
+
+
+
 start:
 call clrscrn
 
@@ -347,7 +457,6 @@ mov ax, [l2]
 push ax
 call textBStreaming
 
-
 mov ax, [scrollN]
 push ax
 mov ax, 72
@@ -359,6 +468,14 @@ push ax
 mov ax, 3
 push ax
 call scrollScreen
+
+mov ax, findString
+push ax
+mov ax, [l3]
+push ax
+mov ax, 0xCE
+push ax
+call findAndHighlight
 
 exit:
 mov ax, 0x4c00
