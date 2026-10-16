@@ -35,7 +35,7 @@ The easiest way to assemble, run, and debug these programs is using the preconfi
 
 ### 2. Open Notepad++
 
-- Launch `notepad++.exe` from the extracted folder.
+- Launch `code` (notepad++) from the extracted folder.
 - The package ships with the required plugins already configured.
 
 ### 3. Load a program
