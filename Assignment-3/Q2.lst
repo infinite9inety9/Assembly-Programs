@@ -1,5 +1,5 @@
      1                                  org 100h
-     2 00000000 E9D103                  jmp start
+     2 00000000 E97104                  jmp start
      3                                  
      4 00000003 5469746C652042616E-     title: db "Title Banner" , 0
      4 0000000C 6E657200           
@@ -37,475 +37,566 @@
      8 00000117 0000                    scrollN: dw 0
      9 00000119 7468726565              findString: db "three"
     10 0000011E 0500                    l3: dw 5
-    11                                  
-    12                                  clrscrn:
-    13 00000120 06                      push es
-    14 00000121 50                      push ax
-    15 00000122 51                      push cx
-    16 00000123 57                      push di
-    17                                  
-    18 00000124 B800B8                  mov ax, 0xb800
-    19 00000127 8EC0                    mov es, ax
-    20 00000129 31FF                    xor di, di
-    21 0000012B B82007                  mov ax, 0x0720
-    22 0000012E B9D007                  mov cx, 2000
-    23                                  
-    24 00000131 FC                      cld
-    25 00000132 F3AB                    rep stosw
-    26                                  
-    27 00000134 5F                      pop di
-    28 00000135 59                      pop cx
-    29 00000136 58                      pop ax
-    30 00000137 07                      pop es
-    31 00000138 C3                      ret
-    32                                  
-    33                                  createVP:
-    34 00000139 55                      push bp
-    35 0000013A 89E5                    mov bp, sp
-    36                                  
-    37 0000013C B800B8                  mov ax, 0xb800
-    38 0000013F 8EC0                    mov es, ax
-    39                                  
-    40                                  corners:
-    41 00000141 B8C90F                  mov ax, 0x0FC9
-    42 00000144 8B7E0A                  mov di, [bp+10]
-    43 00000147 AB                      stosw
-    44 00000148 B8BB0F                  mov ax, 0x0FBB
-    45 0000014B 8B7E08                  mov di, [bp+8]
-    46 0000014E AB                      stosw
-    47 0000014F B8C80F                  mov ax, 0x0FC8
-    48 00000152 8B7E06                  mov di, [bp+6]
-    49 00000155 AB                      stosw
-    50 00000156 B8BC0F                  mov ax, 0x0FBC
-    51 00000159 8B7E04                  mov di, [bp+4]
-    52 0000015C AB                      stosw
-    53                                  
-    54 0000015D B8BA0F                  mov ax, 0x0FBA
-    55 00000160 8B7E0A                  mov di, [bp+10]
-    56 00000163 81C7A000                add word di, 160
-    57 00000167 8B7606                  mov si, [bp+6]
-    58                                  vertical1:
-    59 0000016A 39F7                    cmp di, si
-    60 0000016C 7409                    jz Tvertical2
-    61 0000016E 268905                  mov [es:di], ax
-    62 00000171 81C7A000                add di, 160
-    63 00000175 EBF3                    jmp vertical1
-    64                                  
-    65                                  Tvertical2:
-    66 00000177 B8BA0F                  mov ax, 0x0FBA
-    67 0000017A 8B7E08                  mov di, [bp+8]
-    68 0000017D 81C7A000                add word di, 160
-    69 00000181 8B7604                  mov si, [bp+4]
-    70                                  vertical2:
-    71 00000184 39F7                    cmp di, si
-    72 00000186 7409                    jz Thorizontal1
-    73 00000188 268905                  mov [es:di], ax
-    74 0000018B 81C7A000                add di, 160
-    75 0000018F EBF3                    jmp vertical2
-    76                                  
-    77                                  Thorizontal1:
-    78 00000191 B8CD0F                  mov ax, 0x0FCD
-    79 00000194 8B7E0A                  mov di, [bp+10]
-    80 00000197 83C702                  add word di, 2
-    81 0000019A 8B7608                  mov si, [bp+8]
-    82                                  horizontal1:
-    83 0000019D 39F7                    cmp di, si
-    84 0000019F 7403                    jz Thorizontal2
-    85 000001A1 AB                      stosw
-    86 000001A2 EBF9                    jmp horizontal1
-    87                                  
-    88                                  Thorizontal2:
-    89 000001A4 B8CD0F                  mov ax, 0x0FCD
-    90 000001A7 8B7E06                  mov di, [bp+6]
-    91 000001AA 83C702                  add word di, 2
-    92 000001AD 8B7604                  mov si, [bp+4]
-    93                                  horizontal2:
-    94 000001B0 39F7                    cmp di, si
-    95 000001B2 7403                    jz retVP
-    96 000001B4 AB                      stosw
-    97 000001B5 EBF9                    jmp horizontal2
-    98                                  
-    99                                  retVP:
-   100 000001B7 5D                      pop bp
-   101 000001B8 C20800                  ret 8
-   102                                  
-   103                                  calcCoords:
-   104 000001BB 55                      push bp
-   105 000001BC 89E5                    mov bp, sp
-   106 000001BE 06                      push es
-   107 000001BF 53                      push bx
-   108                                  
-   109 000001C0 8B460A                  mov ax, [bp+10]
-   110 000001C3 BBA000                  mov bx, 160
-   111 000001C6 F7E3                    mul bx
-   112 000001C8 8B5E06                  mov bx, [bp+6]
-   113 000001CB D1E3                    shl bx, 1
-   114 000001CD 01D8                    add ax, bx
-   115 000001CF 50                      push ax
-   116 000001D0 5E                      pop si
-   117                                  
-   118 000001D1 8B460A                  mov ax, [bp+10]
-   119 000001D4 BBA000                  mov bx, 160
-   120 000001D7 F7E3                    mul bx
-   121 000001D9 8B5E04                  mov bx, [bp+4]
-   122 000001DC D1E3                    shl bx, 1
-   123 000001DE 01D8                    add ax, bx
-   124 000001E0 50                      push ax
-   125 000001E1 5F                      pop di
-   126                                  
-   127 000001E2 8B4608                  mov ax, [bp+8]
-   128 000001E5 BBA000                  mov bx, 160
-   129 000001E8 F7E3                    mul bx
-   130 000001EA 8B5E06                  mov bx, [bp+6]
-   131 000001ED D1E3                    shl bx, 1
-   132 000001EF 01D8                    add ax, bx
-   133 000001F1 50                      push ax
-   134 000001F2 59                      pop cx
-   135                                  
-   136 000001F3 8B4608                  mov ax, [bp+8]
-   137 000001F6 BBA000                  mov bx, 160
-   138 000001F9 F7E3                    mul bx
-   139 000001FB 8B5E04                  mov bx, [bp+4]
-   140 000001FE D1E3                    shl bx, 1
-   141 00000200 01D8                    add ax, bx
-   142 00000202 50                      push ax
-   143 00000203 5A                      pop dx
-   144                                  
-   145 00000204 5B                      pop bx
-   146 00000205 07                      pop es
-   147 00000206 5D                      pop bp
-   148 00000207 C20800                  ret 8
+    11 00000120 546F74616C204D6174-     message: db "Total Matches Found: "
+    11 00000129 6368657320466F756E-
+    11 00000132 643A20             
+    12 00000135 1500                    l4: dw 21
+    13 00000137 207C2056696577706F-     message2: db " | Viewport Status: ACTIVE"
+    13 00000140 727420537461747573-
+    13 00000149 3A20414354495645   
+    14 00000151 1A00                    l5: dw 26
+    15 00000153 0000                    foundC: dw 0
+    16                                  
+    17                                  clrscrn:
+    18 00000155 06                      push es
+    19 00000156 50                      push ax
+    20 00000157 51                      push cx
+    21 00000158 57                      push di
+    22                                  
+    23 00000159 B800B8                  mov ax, 0xb800
+    24 0000015C 8EC0                    mov es, ax
+    25 0000015E 31FF                    xor di, di
+    26 00000160 B82007                  mov ax, 0x0720
+    27 00000163 B9D007                  mov cx, 2000
+    28                                  
+    29 00000166 FC                      cld
+    30 00000167 F3AB                    rep stosw
+    31                                  
+    32 00000169 5F                      pop di
+    33 0000016A 59                      pop cx
+    34 0000016B 58                      pop ax
+    35 0000016C 07                      pop es
+    36 0000016D C3                      ret
+    37                                  
+    38                                  createVP:
+    39 0000016E 55                      push bp
+    40 0000016F 89E5                    mov bp, sp
+    41                                  
+    42 00000171 B800B8                  mov ax, 0xb800
+    43 00000174 8EC0                    mov es, ax
+    44                                  
+    45                                  corners:
+    46 00000176 B8C90F                  mov ax, 0x0FC9
+    47 00000179 8B7E0A                  mov di, [bp+10]
+    48 0000017C AB                      stosw
+    49 0000017D B8BB0F                  mov ax, 0x0FBB
+    50 00000180 8B7E08                  mov di, [bp+8]
+    51 00000183 AB                      stosw
+    52 00000184 B8C80F                  mov ax, 0x0FC8
+    53 00000187 8B7E06                  mov di, [bp+6]
+    54 0000018A AB                      stosw
+    55 0000018B B8BC0F                  mov ax, 0x0FBC
+    56 0000018E 8B7E04                  mov di, [bp+4]
+    57 00000191 AB                      stosw
+    58                                  
+    59 00000192 B8BA0F                  mov ax, 0x0FBA
+    60 00000195 8B7E0A                  mov di, [bp+10]
+    61 00000198 81C7A000                add word di, 160
+    62 0000019C 8B7606                  mov si, [bp+6]
+    63                                  vertical1:
+    64 0000019F 39F7                    cmp di, si
+    65 000001A1 7409                    jz Tvertical2
+    66 000001A3 268905                  mov [es:di], ax
+    67 000001A6 81C7A000                add di, 160
+    68 000001AA EBF3                    jmp vertical1
+    69                                  
+    70                                  Tvertical2:
+    71 000001AC B8BA0F                  mov ax, 0x0FBA
+    72 000001AF 8B7E08                  mov di, [bp+8]
+    73 000001B2 81C7A000                add word di, 160
+    74 000001B6 8B7604                  mov si, [bp+4]
+    75                                  vertical2:
+    76 000001B9 39F7                    cmp di, si
+    77 000001BB 7409                    jz Thorizontal1
+    78 000001BD 268905                  mov [es:di], ax
+    79 000001C0 81C7A000                add di, 160
+    80 000001C4 EBF3                    jmp vertical2
+    81                                  
+    82                                  Thorizontal1:
+    83 000001C6 B8CD0F                  mov ax, 0x0FCD
+    84 000001C9 8B7E0A                  mov di, [bp+10]
+    85 000001CC 83C702                  add word di, 2
+    86 000001CF 8B7608                  mov si, [bp+8]
+    87                                  horizontal1:
+    88 000001D2 39F7                    cmp di, si
+    89 000001D4 7403                    jz Thorizontal2
+    90 000001D6 AB                      stosw
+    91 000001D7 EBF9                    jmp horizontal1
+    92                                  
+    93                                  Thorizontal2:
+    94 000001D9 B8CD0F                  mov ax, 0x0FCD
+    95 000001DC 8B7E06                  mov di, [bp+6]
+    96 000001DF 83C702                  add word di, 2
+    97 000001E2 8B7604                  mov si, [bp+4]
+    98                                  horizontal2:
+    99 000001E5 39F7                    cmp di, si
+   100 000001E7 7403                    jz retVP
+   101 000001E9 AB                      stosw
+   102 000001EA EBF9                    jmp horizontal2
+   103                                  
+   104                                  retVP:
+   105 000001EC 5D                      pop bp
+   106 000001ED C20800                  ret 8
+   107                                  
+   108                                  calcCoords:
+   109 000001F0 55                      push bp
+   110 000001F1 89E5                    mov bp, sp
+   111 000001F3 06                      push es
+   112 000001F4 53                      push bx
+   113                                  
+   114 000001F5 8B460A                  mov ax, [bp+10]
+   115 000001F8 BBA000                  mov bx, 160
+   116 000001FB F7E3                    mul bx
+   117 000001FD 8B5E06                  mov bx, [bp+6]
+   118 00000200 D1E3                    shl bx, 1
+   119 00000202 01D8                    add ax, bx
+   120 00000204 50                      push ax
+   121 00000205 5E                      pop si
+   122                                  
+   123 00000206 8B460A                  mov ax, [bp+10]
+   124 00000209 BBA000                  mov bx, 160
+   125 0000020C F7E3                    mul bx
+   126 0000020E 8B5E04                  mov bx, [bp+4]
+   127 00000211 D1E3                    shl bx, 1
+   128 00000213 01D8                    add ax, bx
+   129 00000215 50                      push ax
+   130 00000216 5F                      pop di
+   131                                  
+   132 00000217 8B4608                  mov ax, [bp+8]
+   133 0000021A BBA000                  mov bx, 160
+   134 0000021D F7E3                    mul bx
+   135 0000021F 8B5E06                  mov bx, [bp+6]
+   136 00000222 D1E3                    shl bx, 1
+   137 00000224 01D8                    add ax, bx
+   138 00000226 50                      push ax
+   139 00000227 59                      pop cx
+   140                                  
+   141 00000228 8B4608                  mov ax, [bp+8]
+   142 0000022B BBA000                  mov bx, 160
+   143 0000022E F7E3                    mul bx
+   144 00000230 8B5E04                  mov bx, [bp+4]
+   145 00000233 D1E3                    shl bx, 1
+   146 00000235 01D8                    add ax, bx
+   147 00000237 50                      push ax
+   148 00000238 5A                      pop dx
    149                                  
-   150                                  titleBanner:
-   151 0000020A 55                      push bp
-   152 0000020B 89E5                    mov bp, sp
-   153 0000020D 56                      push si
-   154 0000020E 51                      push cx
-   155                                  
-   156 0000020F B800B8                  mov ax, 0xb800
-   157 00000212 8EC0                    mov es, ax
-   158                                  
-   159 00000214 B83F00                  mov ax, 63
-   160 00000217 8B5E04                  mov bx, [bp+4]
-   161 0000021A 29D8                    sub ax, bx
-   162 0000021C D1E8                    shr ax, 1
-   163 0000021E 83C008                  add ax, 8
-   164 00000221 50                      push ax
-   165                                  
-   166 00000222 B80200                  mov ax, 2
-   167 00000225 BBA000                  mov bx, 160
-   168 00000228 F7E3                    mul bx
-   169                                  
-   170 0000022A 5B                      pop bx
-   171 0000022B D1E3                    shl bx, 1
-   172 0000022D 01D8                    add ax, bx
-   173                                  
-   174 0000022F 89C7                    mov di, ax
-   175                                  
-   176 00000231 8B7606                  mov si, [bp+6]
-   177 00000234 8B4E04                  mov cx, [bp+4]
+   150 00000239 5B                      pop bx
+   151 0000023A 07                      pop es
+   152 0000023B 5D                      pop bp
+   153 0000023C C20800                  ret 8
+   154                                  
+   155                                  titleBanner:
+   156 0000023F 55                      push bp
+   157 00000240 89E5                    mov bp, sp
+   158 00000242 56                      push si
+   159 00000243 51                      push cx
+   160                                  
+   161 00000244 B800B8                  mov ax, 0xb800
+   162 00000247 8EC0                    mov es, ax
+   163                                  
+   164 00000249 B83F00                  mov ax, 63
+   165 0000024C 8B5E04                  mov bx, [bp+4]
+   166 0000024F 29D8                    sub ax, bx
+   167 00000251 D1E8                    shr ax, 1
+   168 00000253 83C008                  add ax, 8
+   169 00000256 50                      push ax
+   170                                  
+   171 00000257 B80200                  mov ax, 2
+   172 0000025A BBA000                  mov bx, 160
+   173 0000025D F7E3                    mul bx
+   174                                  
+   175 0000025F 5B                      pop bx
+   176 00000260 D1E3                    shl bx, 1
+   177 00000262 01D8                    add ax, bx
    178                                  
-   179 00000237 B41E                    mov ah, 0x1E
+   179 00000264 89C7                    mov di, ax
    180                                  
-   181                                  printLoop:
-   182 00000239 3E8A04                  mov al, [ds:si]
-   183 0000023C AB                      stosw
-   184 0000023D 46                      inc si
-   185 0000023E E2F9                    loop printLoop
-   186                                  
-   187 00000240 59                      pop cx
-   188 00000241 5E                      pop si
-   189 00000242 5D                      pop bp
-   190 00000243 C20400                  ret 4
+   181 00000266 8B7606                  mov si, [bp+6]
+   182 00000269 8B4E04                  mov cx, [bp+4]
+   183                                  
+   184 0000026C B41E                    mov ah, 0x1E
+   185                                  
+   186                                  printLoop:
+   187 0000026E 3E8A04                  mov al, [ds:si]
+   188 00000271 AB                      stosw
+   189 00000272 46                      inc si
+   190 00000273 E2F9                    loop printLoop
    191                                  
-   192                                  textBStreaming:
-   193 00000246 55                      push bp
-   194 00000247 89E5                    mov bp, sp
-   195 00000249 56                      push si
-   196 0000024A 57                      push di
-   197 0000024B 53                      push bx
-   198                                  
-   199 0000024C B800B8                  mov ax, 0xb800
-   200 0000024F 8EC0                    mov es, ax
-   201                                  
-   202 00000251 B80500                  mov ax, 5
-   203 00000254 BBA000                  mov bx, 160
-   204 00000257 F7E3                    mul bx
-   205 00000259 BB0A00                  mov bx, 10
-   206 0000025C D1E3                    shl bx, 1
-   207 0000025E 01D8                    add ax, bx
-   208 00000260 89C7                    mov di, ax
-   209                                  
-   210 00000262 8B7606                  mov si, [bp+6]
-   211 00000265 8B4E04                  mov cx, [bp+4]
-   212 00000268 B40F                    mov ah, 0x0F
-   213 0000026A 31DB                    xor bx, bx
+   192 00000275 59                      pop cx
+   193 00000276 5E                      pop si
+   194 00000277 5D                      pop bp
+   195 00000278 C20400                  ret 4
+   196                                  
+   197                                  textBStreaming:
+   198 0000027B 55                      push bp
+   199 0000027C 89E5                    mov bp, sp
+   200 0000027E 56                      push si
+   201 0000027F 57                      push di
+   202 00000280 53                      push bx
+   203                                  
+   204 00000281 B800B8                  mov ax, 0xb800
+   205 00000284 8EC0                    mov es, ax
+   206                                  
+   207 00000286 B80500                  mov ax, 5
+   208 00000289 BBA000                  mov bx, 160
+   209 0000028C F7E3                    mul bx
+   210 0000028E BB0A00                  mov bx, 10
+   211 00000291 D1E3                    shl bx, 1
+   212 00000293 01D8                    add ax, bx
+   213 00000295 89C7                    mov di, ax
    214                                  
-   215                                  print:
-   216 0000026C 3E8A04                  mov al, [ds:si]
-   217 0000026F AB                      stosw
-   218 00000270 46                      inc si
-   219 00000271 43                      inc bx
-   220 00000272 83FB3D                  cmp bx, 61
-   221 00000275 7505                    jne next
-   222 00000277 31DB                    xor bx, bx
-   223 00000279 83C726                  add di, 38
-   224                                  next:
-   225 0000027C E2EE                    loop print
-   226                                  
-   227 0000027E 5B                      pop bx
-   228 0000027F 5F                      pop di
-   229 00000280 5E                      pop si
-   230 00000281 5D                      pop bp
-   231 00000282 C20400                  ret 4
-   232                                  
-   233                                  scrollScreen:
-   234 00000285 55                      push bp
-   235 00000286 89E5                    mov bp, sp
-   236 00000288 83EC06                  sub sp, 6
-   237 0000028B 50                      push ax
-   238 0000028C 53                      push bx
-   239 0000028D 51                      push cx
-   240 0000028E 52                      push dx
-   241 0000028F 56                      push si
-   242 00000290 57                      push di
-   243 00000291 06                      push es
-   244 00000292 1E                      push ds
-   245                                  
-   246 00000293 B800B8                  mov ax, 0xb800
-   247 00000296 8EC0                    mov es, ax
-   248 00000298 8ED8                    mov ds, ax
-   249                                  
-   250 0000029A 8B460A                  mov ax, [bp+10]
-   251 0000029D 2B4606                  sub ax, [bp+6]
-   252 000002A0 48                      dec ax
-   253 000002A1 D1E0                    shl ax, 1
+   215 00000297 8B7606                  mov si, [bp+6]
+   216 0000029A 8B4E04                  mov cx, [bp+4]
+   217 0000029D B40F                    mov ah, 0x0F
+   218 0000029F 31DB                    xor bx, bx
+   219                                  
+   220                                  print:
+   221 000002A1 3E8A04                  mov al, [ds:si]
+   222 000002A4 AB                      stosw
+   223 000002A5 46                      inc si
+   224 000002A6 43                      inc bx
+   225 000002A7 83FB3D                  cmp bx, 61
+   226 000002AA 7505                    jne next
+   227 000002AC 31DB                    xor bx, bx
+   228 000002AE 83C726                  add di, 38
+   229                                  next:
+   230 000002B1 E2EE                    loop print
+   231                                  
+   232 000002B3 5B                      pop bx
+   233 000002B4 5F                      pop di
+   234 000002B5 5E                      pop si
+   235 000002B6 5D                      pop bp
+   236 000002B7 C20400                  ret 4
+   237                                  
+   238                                  scroll_window_up:
+   239 000002BA 55                      push bp
+   240 000002BB 89E5                    mov bp, sp
+   241 000002BD 83EC06                  sub sp, 6
+   242 000002C0 50                      push ax
+   243 000002C1 53                      push bx
+   244 000002C2 51                      push cx
+   245 000002C3 52                      push dx
+   246 000002C4 56                      push si
+   247 000002C5 57                      push di
+   248 000002C6 06                      push es
+   249 000002C7 1E                      push ds
+   250                                  
+   251 000002C8 B800B8                  mov ax, 0xb800
+   252 000002CB 8EC0                    mov es, ax
+   253 000002CD 8ED8                    mov ds, ax
    254                                  
-   255 000002A3 8946FE                  mov [bp-2], ax
-   256 000002A6 8B4606                  mov ax, [bp+6]
-   257 000002A9 40                      inc ax
-   258 000002AA D1E0                    shl ax, 1
+   255 000002CF 8B460A                  mov ax, [bp+10]
+   256 000002D2 2B4606                  sub ax, [bp+6]
+   257 000002D5 48                      dec ax
+   258 000002D6 D1E0                    shl ax, 1
    259                                  
-   260 000002AC 8946FC                  mov [bp-4], ax
-   261 000002AF 8B460C                  mov ax, [bp+12]
-   262 000002B2 8946FA                  mov [bp-6], ax
-   263                                  
-   264 000002B5 837EFA00                cmp word [bp-6], 0
-   265 000002B9 7E4E                    jle done
-   266                                  
-   267                                  outerLoop:
-   268 000002BB 8B5E04                  mov bx, [bp+4]
-   269 000002BE 43                      inc bx
-   270 000002BF 43                      inc bx
+   260 000002D8 8946FE                  mov [bp-2], ax
+   261 000002DB 8B4606                  mov ax, [bp+6]
+   262 000002DE 40                      inc ax
+   263 000002DF D1E0                    shl ax, 1
+   264                                  
+   265 000002E1 8946FC                  mov [bp-4], ax
+   266 000002E4 8B460C                  mov ax, [bp+12]
+   267 000002E7 8946FA                  mov [bp-6], ax
+   268                                  
+   269 000002EA 837EFA00                cmp word [bp-6], 0
+   270 000002EE 7E4E                    jle done
    271                                  
-   272                                  copyRow:
-   273 000002C0 8B4608                  mov ax, [bp+8]
-   274 000002C3 48                      dec ax
-   275 000002C4 39C3                    cmp bx, ax
+   272                                  outerLoop:
+   273 000002F0 8B5E04                  mov bx, [bp+4]
+   274 000002F3 43                      inc bx
+   275 000002F4 43                      inc bx
    276                                  
-   277 000002C6 7724                    ja blankLast
-   278 000002C8 89D8                    mov ax, bx
-   279 000002CA 48                      dec ax
-   280 000002CB BAA000                  mov dx, 160
-   281 000002CE F7E2                    mul dx
-   282 000002D0 0346FC                  add ax, [bp-4]
-   283 000002D3 89C7                    mov di, ax
-   284 000002D5 89D8                    mov ax, bx
-   285 000002D7 BAA000                  mov dx, 160
-   286 000002DA F7E2                    mul dx
-   287 000002DC 0346FC                  add ax, [bp-4]
-   288 000002DF 89C6                    mov si, ax
-   289 000002E1 8B4EFE                  mov cx, [bp-2]
-   290 000002E4 D1E9                    shr cx, 1
-   291                                  
-   292 000002E6 FC                      cld
-   293 000002E7 F3A5                    rep movsw
-   294 000002E9 43                      inc bx
-   295 000002EA EBD4                    jmp copyRow
+   277                                  copyRow:
+   278 000002F5 8B4608                  mov ax, [bp+8]
+   279 000002F8 48                      dec ax
+   280 000002F9 39C3                    cmp bx, ax
+   281                                  
+   282 000002FB 7724                    ja blankLast
+   283 000002FD 89D8                    mov ax, bx
+   284 000002FF 48                      dec ax
+   285 00000300 BAA000                  mov dx, 160
+   286 00000303 F7E2                    mul dx
+   287 00000305 0346FC                  add ax, [bp-4]
+   288 00000308 89C7                    mov di, ax
+   289 0000030A 89D8                    mov ax, bx
+   290 0000030C BAA000                  mov dx, 160
+   291 0000030F F7E2                    mul dx
+   292 00000311 0346FC                  add ax, [bp-4]
+   293 00000314 89C6                    mov si, ax
+   294 00000316 8B4EFE                  mov cx, [bp-2]
+   295 00000319 D1E9                    shr cx, 1
    296                                  
-   297                                  blankLast:
-   298 000002EC 8B4608                  mov ax, [bp+8]
-   299 000002EF 48                      dec ax
-   300 000002F0 BAA000                  mov dx, 160
-   301 000002F3 F7E2                    mul dx
-   302 000002F5 0346FC                  add ax, [bp-4]
-   303 000002F8 89C7                    mov di, ax
-   304 000002FA 8B4EFE                  mov cx, [bp-2]
-   305 000002FD D1E9                    shr cx, 1
-   306 000002FF B82007                  mov ax, 0x0720
-   307 00000302 F3AB                    rep stosw
-   308 00000304 FF4EFA                  dec word [bp-6]
-   309 00000307 75B2                    jnz outerLoop
-   310                                  
-   311                                  done:
-   312 00000309 1F                      pop ds
-   313 0000030A 07                      pop es
-   314 0000030B 5F                      pop di
-   315 0000030C 5E                      pop si
-   316 0000030D 5A                      pop dx
-   317 0000030E 59                      pop cx
-   318 0000030F 5B                      pop bx
-   319 00000310 58                      pop ax
-   320 00000311 89EC                    mov sp, bp
-   321 00000313 5D                      pop bp
-   322 00000314 C20A00                  ret 10
-   323                                  
-   324                                  findAndHighlight:
-   325 00000317 55                      push bp
-   326 00000318 89E5                    mov bp, sp
-   327 0000031A 50                      push ax
-   328 0000031B 53                      push bx
-   329 0000031C 51                      push cx
-   330 0000031D 52                      push dx
-   331 0000031E 56                      push si
-   332 0000031F 57                      push di
-   333 00000320 1E                      push ds
-   334 00000321 06                      push es
-   335                                  
-   336 00000322 8CD8                    mov ax, ds
-   337 00000324 8EC0                    mov es, ax
-   338 00000326 BE[1200]                mov si, paragraph
-   339                                  
-   340                                  searchLoop:
-   341 00000329 803C00                  cmp byte [si], 0
-   342 0000032C 0F849800                je fhDone
-   343 00000330 81FE[1200]              cmp si, paragraph
-   344 00000334 7417                    je checkWord
-   345 00000336 8A44FF                  mov al, [si-1]
-   346 00000339 3C41                    cmp al, 'A'
-   347 0000033B 720E                    jb  leadingOk
-   348 0000033D 3C5A                    cmp al, 'Z'
-   349 0000033F 0F868100                jbe nextChar
-   350 00000343 3C61                    cmp al, 'a'
-   351 00000345 7204                    jb  leadingOk
-   352 00000347 3C7A                    cmp al, 'z'
-   353 00000349 7679                    jbe nextChar
-   354                                  leadingOk:
-   355 0000034B EB00                    jmp checkWord
-   356                                  
-   357                                  checkWord:
-   358 0000034D BF[1901]                mov di, findString
-   359 00000350 8B0E[1E01]              mov cx, [l3]
-   360 00000354 56                      push si
-   361 00000355 F3A6                    repe cmpsb
-   362 00000357 5E                      pop si
-   363 00000358 756A                    jne nextChar
-   364 0000035A 89F3                    mov bx, si
-   365 0000035C 031E[1E01]              add bx, [l3]
-   366 00000360 8A07                    mov al, [bx]
-   367 00000362 3C41                    cmp al, 'A'
-   368 00000364 720C                    jb  trailingOk
-   369 00000366 3C5A                    cmp al, 'Z'
-   370 00000368 765A                    jbe nextChar
-   371 0000036A 3C61                    cmp al, 'a'
-   372 0000036C 7204                    jb  trailingOk
-   373 0000036E 3C7A                    cmp al, 'z'
-   374 00000370 7652                    jbe nextChar
-   375                                  trailingOk:
-   376                                  
-   377                                  foundWord:
-   378 00000372 89F3                    mov bx, si
-   379 00000374 81EB[1200]              sub bx, paragraph
-   380 00000378 89D8                    mov ax, bx
-   381 0000037A 31D2                    xor dx, dx
-   382 0000037C B93D00                  mov cx, 61
-   383 0000037F F7F1                    div cx
-   384 00000381 89D3                    mov bx, dx
-   385 00000383 89C2                    mov dx, ax
-   386 00000385 B8A000                  mov ax, 160
-   387 00000388 F7E2                    mul dx
-   388 0000038A 50                      push ax
-   389 0000038B B80500                  mov ax, 5
-   390 0000038E 2B06[1701]              sub ax, [scrollN]
-   391 00000392 B9A000                  mov cx, 160
-   392 00000395 F7E1                    mul cx
-   393 00000397 83C014                  add ax, 20
-   394 0000039A 5A                      pop dx
-   395 0000039B 01D0                    add ax, dx
-   396 0000039D 01D8                    add ax, bx
-   397 0000039F 01D8                    add ax, bx
-   398 000003A1 89C7                    mov di, ax
-   399 000003A3 6800B8                  push 0xb800
-   400 000003A6 07                      pop es
-   401 000003A7 8B0E[1E01]              mov cx, [l3]
-   402                                  hlLoop:
-   403 000003AB 26C64501CE              mov byte [es:di+1], 0CEh
-   404 000003B0 83C702                  add di, 2
-   405 000003B3 43                      inc bx
-   406 000003B4 83FB3D                  cmp bx, 61
-   407 000003B7 7505                    jne hlNoWrap
-   408 000003B9 31DB                    xor bx, bx
-   409 000003BB 83C726                  add di, 38
-   410                                  hlNoWrap:
-   411 000003BE E2EB                    loop hlLoop
-   412 000003C0 8CD8                    mov ax, ds
-   413 000003C2 8EC0                    mov es, ax
-   414                                  
-   415                                  nextChar:
-   416 000003C4 46                      inc si
-   417 000003C5 E961FF                  jmp searchLoop
-   418                                  
-   419                                  fhDone:
-   420 000003C8 07                      pop es
-   421 000003C9 1F                      pop ds
-   422 000003CA 5F                      pop di
-   423 000003CB 5E                      pop si
-   424 000003CC 5A                      pop dx
-   425 000003CD 59                      pop cx
-   426 000003CE 5B                      pop bx
-   427 000003CF 58                      pop ax
-   428 000003D0 5D                      pop bp
-   429 000003D1 C20600                  ret 6
-   430                                  
-   431                                  
-   432                                  
-   433                                  start:
-   434 000003D4 E849FD                  call clrscrn
-   435                                  
-   436 000003D7 6A03                    push word 3
-   437 000003D9 6A15                    push word 21
-   438 000003DB 6A08                    push word 8
-   439 000003DD 6A48                    push word 72
-   440 000003DF E8D9FD                  call calcCoords
-   441                                  
-   442 000003E2 56                      push si
-   443 000003E3 57                      push di
-   444 000003E4 51                      push cx
-   445 000003E5 52                      push dx
-   446 000003E6 E850FD                  call createVP
-   447                                  
-   448 000003E9 B8[0300]                mov ax, title
-   449 000003EC 50                      push ax
-   450 000003ED A1[1000]                mov ax, [l1]
-   451 000003F0 50                      push ax
-   452 000003F1 E816FE                  call titleBanner
+   297 0000031B FC                      cld
+   298 0000031C F3A5                    rep movsw
+   299 0000031E 43                      inc bx
+   300 0000031F EBD4                    jmp copyRow
+   301                                  
+   302                                  blankLast:
+   303 00000321 8B4608                  mov ax, [bp+8]
+   304 00000324 48                      dec ax
+   305 00000325 BAA000                  mov dx, 160
+   306 00000328 F7E2                    mul dx
+   307 0000032A 0346FC                  add ax, [bp-4]
+   308 0000032D 89C7                    mov di, ax
+   309 0000032F 8B4EFE                  mov cx, [bp-2]
+   310 00000332 D1E9                    shr cx, 1
+   311 00000334 B82007                  mov ax, 0x0720
+   312 00000337 F3AB                    rep stosw
+   313 00000339 FF4EFA                  dec word [bp-6]
+   314 0000033C 75B2                    jnz outerLoop
+   315                                  
+   316                                  done:
+   317 0000033E 1F                      pop ds
+   318 0000033F 07                      pop es
+   319 00000340 5F                      pop di
+   320 00000341 5E                      pop si
+   321 00000342 5A                      pop dx
+   322 00000343 59                      pop cx
+   323 00000344 5B                      pop bx
+   324 00000345 58                      pop ax
+   325 00000346 89EC                    mov sp, bp
+   326 00000348 5D                      pop bp
+   327 00000349 C20A00                  ret 10
+   328                                  
+   329                                  find_and_highlight:
+   330 0000034C 55                      push bp
+   331 0000034D 89E5                    mov bp, sp
+   332 0000034F 50                      push ax
+   333 00000350 53                      push bx
+   334 00000351 51                      push cx
+   335 00000352 52                      push dx
+   336 00000353 56                      push si
+   337 00000354 57                      push di
+   338 00000355 1E                      push ds
+   339 00000356 06                      push es
+   340                                  
+   341 00000357 8CD8                    mov ax, ds
+   342 00000359 8EC0                    mov es, ax
+   343 0000035B BE[1200]                mov si, paragraph
+   344                                  
+   345                                  searchLoop:
+   346 0000035E 803C00                  cmp byte [si], 0
+   347 00000361 0F849C00                je fhDone
+   348 00000365 81FE[1200]              cmp si, paragraph
+   349 00000369 7417                    je checkWord
+   350 0000036B 8A44FF                  mov al, [si-1]
+   351 0000036E 3C41                    cmp al, 'A'
+   352 00000370 720E                    jb  leadingOk
+   353 00000372 3C5A                    cmp al, 'Z'
+   354 00000374 0F868500                jbe nextChar
+   355 00000378 3C61                    cmp al, 'a'
+   356 0000037A 7204                    jb  leadingOk
+   357 0000037C 3C7A                    cmp al, 'z'
+   358 0000037E 767D                    jbe nextChar
+   359                                  leadingOk:
+   360 00000380 EB00                    jmp checkWord
+   361                                  
+   362                                  checkWord:
+   363 00000382 8B7E08                  mov di, [bp+8]
+   364 00000385 8B4E06                  mov cx, [bp+6]
+   365 00000388 56                      push si
+   366 00000389 F3A6                    repe cmpsb
+   367 0000038B 5E                      pop si
+   368 0000038C 756F                    jne nextChar
+   369 0000038E 89F3                    mov bx, si
+   370 00000390 035E06                  add bx, [bp+6]
+   371 00000393 8A07                    mov al, [bx]
+   372 00000395 3C41                    cmp al, 'A'
+   373 00000397 720C                    jb  trailingOk
+   374 00000399 3C5A                    cmp al, 'Z'
+   375 0000039B 7660                    jbe nextChar
+   376 0000039D 3C61                    cmp al, 'a'
+   377 0000039F 7204                    jb  trailingOk
+   378 000003A1 3C7A                    cmp al, 'z'
+   379 000003A3 7658                    jbe nextChar
+   380                                  trailingOk:
+   381                                  
+   382                                  foundWord:
+   383 000003A5 89F3                    mov bx, si
+   384 000003A7 81EB[1200]              sub bx, paragraph
+   385 000003AB 89D8                    mov ax, bx
+   386 000003AD 31D2                    xor dx, dx
+   387 000003AF B93D00                  mov cx, 61
+   388 000003B2 F7F1                    div cx
+   389 000003B4 89D3                    mov bx, dx
+   390 000003B6 89C2                    mov dx, ax
+   391 000003B8 B8A000                  mov ax, 160
+   392 000003BB F7E2                    mul dx
+   393 000003BD 50                      push ax
+   394 000003BE B80500                  mov ax, 5
+   395 000003C1 2B06[1701]              sub ax, [scrollN]
+   396 000003C5 B9A000                  mov cx, 160
+   397 000003C8 F7E1                    mul cx
+   398 000003CA 83C014                  add ax, 20
+   399 000003CD 5A                      pop dx
+   400 000003CE 01D0                    add ax, dx
+   401 000003D0 01D8                    add ax, bx
+   402 000003D2 01D8                    add ax, bx
+   403 000003D4 89C7                    mov di, ax
+   404 000003D6 6800B8                  push 0xb800
+   405 000003D9 07                      pop es
+   406 000003DA 8B4E06                  mov cx, [bp+6]
+   407                                  hlLoop:
+   408 000003DD 8A5604                  mov dl, [bp+4]
+   409 000003E0 26885501                mov byte [es:di+1], dl
+   410 000003E4 83C702                  add di, 2
+   411 000003E7 43                      inc bx
+   412 000003E8 83FB3D                  cmp bx, 61
+   413 000003EB 7505                    jne hlNoWrap
+   414 000003ED 31DB                    xor bx, bx
+   415 000003EF 83C726                  add di, 38
+   416                                  hlNoWrap:
+   417 000003F2 E2E9                    loop hlLoop
+   418 000003F4 8306[5301]01            add word [foundC], 1
+   419 000003F9 8CD8                    mov ax, ds
+   420 000003FB 8EC0                    mov es, ax
+   421                                  
+   422                                  nextChar:
+   423 000003FD 46                      inc si
+   424 000003FE E95DFF                  jmp searchLoop
+   425                                  
+   426                                  fhDone:
+   427 00000401 07                      pop es
+   428 00000402 1F                      pop ds
+   429 00000403 5F                      pop di
+   430 00000404 5E                      pop si
+   431 00000405 5A                      pop dx
+   432 00000406 59                      pop cx
+   433 00000407 5B                      pop bx
+   434 00000408 58                      pop ax
+   435 00000409 5D                      pop bp
+   436 0000040A C20600                  ret 6
+   437                                  
+   438                                  printNum:
+   439 0000040D 55                      push bp
+   440 0000040E 89E5                    mov bp, sp
+   441 00000410 50                      push ax
+   442 00000411 53                      push bx
+   443 00000412 51                      push cx
+   444 00000413 52                      push dx
+   445 00000414 56                      push si
+   446 00000415 57                      push di
+   447 00000416 06                      push es
+   448 00000417 1E                      push ds
+   449                                  
+   450 00000418 B800B8                  mov ax, 0xb800
+   451 0000041B 8EC0                    mov es, ax
+   452 0000041D 31FF                    xor di, di
    453                                  
-   454 000003F4 B8[1200]                mov ax, paragraph
-   455 000003F7 50                      push ax
-   456 000003F8 A1[1501]                mov ax, [l2]
-   457 000003FB 50                      push ax
-   458 000003FC E847FE                  call textBStreaming
-   459                                  
-   460 000003FF A1[1701]                mov ax, [scrollN]
-   461 00000402 50                      push ax
-   462 00000403 B84800                  mov ax, 72
-   463 00000406 50                      push ax
-   464 00000407 B81500                  mov ax, 21
-   465 0000040A 50                      push ax
-   466 0000040B B80800                  mov ax, 8
-   467 0000040E 50                      push ax
-   468 0000040F B80300                  mov ax, 3
-   469 00000412 50                      push ax
-   470 00000413 E86FFE                  call scrollScreen
-   471                                  
-   472 00000416 B8[1901]                mov ax, findString
-   473 00000419 50                      push ax
-   474 0000041A A1[1E01]                mov ax, [l3]
-   475 0000041D 50                      push ax
-   476 0000041E B8CE00                  mov ax, 0xCE
-   477 00000421 50                      push ax
-   478 00000422 E8F2FE                  call findAndHighlight
-   479                                  
-   480                                  exit:
-   481 00000425 B8004C                  mov ax, 0x4c00
-   482 00000428 CD21                    int 0x21
+   454 0000041F B81700                  mov ax, 23
+   455 00000422 BB5000                  mov bx, 80
+   456 00000425 F7E3                    mul bx
+   457 00000427 B90900                  mov cx, 9
+   458 0000042A 01C8                    add ax, cx
+   459 0000042C D1E0                    shl ax, 1
+   460 0000042E 89C7                    mov di, ax
+   461 00000430 8B760C                  mov si, [bp+12]
+   462 00000433 8B4E0A                  mov cx, [bp+10]
+   463 00000436 B407                    mov ah, 0x07
+   464 00000438 FC                      cld
+   465                                  nextChar1:
+   466 00000439 AC                      lodsb
+   467 0000043A AB                      stosw
+   468 0000043B E2FC                    loop nextChar1
+   469                                  
+   470 0000043D 8B4604                  mov ax, [bp+4]
+   471 00000440 BB0A00                  mov bx, 10
+   472 00000443 31C9                    xor cx, cx
+   473                                  pnDigits:
+   474 00000445 31D2                    xor dx, dx
+   475 00000447 F7F3                    div bx
+   476 00000449 52                      push dx
+   477 0000044A 41                      inc cx
+   478 0000044B 83F800                  cmp ax, 0
+   479 0000044E 75F5                    jne pnDigits
+   480                                  pnEmit:
+   481 00000450 5A                      pop dx
+   482 00000451 80C230                  add dl, '0'
+   483 00000454 88D0                    mov al, dl
+   484 00000456 B407                    mov ah, 0x07
+   485 00000458 AB                      stosw
+   486 00000459 E2F5                    loop pnEmit
+   487                                  
+   488 0000045B 8B7608                  mov si, [bp+8]
+   489 0000045E 8B4E06                  mov cx, [bp+6]
+   490 00000461 B407                    mov ah, 0x07
+   491 00000463 FC                      cld
+   492                                  nextChar2:
+   493 00000464 AC                      lodsb
+   494 00000465 AB                      stosw
+   495 00000466 E2FC                    loop nextChar2
+   496                                  
+   497 00000468 1F                      pop ds
+   498 00000469 07                      pop es
+   499 0000046A 5F                      pop di
+   500 0000046B 5E                      pop si
+   501 0000046C 5A                      pop dx
+   502 0000046D 59                      pop cx
+   503 0000046E 5B                      pop bx
+   504 0000046F 58                      pop ax
+   505 00000470 5D                      pop bp
+   506 00000471 C20A00                  ret 10
+   507                                  
+   508                                  start:
+   509 00000474 E8DEFC                  call clrscrn
+   510                                  
+   511 00000477 6A03                    push word 3
+   512 00000479 6A15                    push word 21
+   513 0000047B 6A08                    push word 8
+   514 0000047D 6A48                    push word 72
+   515 0000047F E86EFD                  call calcCoords
+   516                                  
+   517 00000482 56                      push si
+   518 00000483 57                      push di
+   519 00000484 51                      push cx
+   520 00000485 52                      push dx
+   521 00000486 E8E5FC                  call createVP
+   522                                  
+   523 00000489 B8[0300]                mov ax, title
+   524 0000048C 50                      push ax
+   525 0000048D A1[1000]                mov ax, [l1]
+   526 00000490 50                      push ax
+   527 00000491 E8ABFD                  call titleBanner
+   528                                  
+   529 00000494 B8[1200]                mov ax, paragraph
+   530 00000497 50                      push ax
+   531 00000498 A1[1501]                mov ax, [l2]
+   532 0000049B 50                      push ax
+   533 0000049C E8DCFD                  call textBStreaming
+   534                                  
+   535 0000049F A1[1701]                mov ax, [scrollN]
+   536 000004A2 50                      push ax
+   537 000004A3 B84800                  mov ax, 72
+   538 000004A6 50                      push ax
+   539 000004A7 B81500                  mov ax, 21
+   540 000004AA 50                      push ax
+   541 000004AB B80800                  mov ax, 8
+   542 000004AE 50                      push ax
+   543 000004AF B80300                  mov ax, 3
+   544 000004B2 50                      push ax
+   545 000004B3 E804FE                  call scroll_window_up
+   546                                  
+   547 000004B6 B8[1901]                mov ax, findString
+   548 000004B9 50                      push ax
+   549 000004BA A1[1E01]                mov ax, [l3]
+   550 000004BD 50                      push ax
+   551 000004BE B8CE00                  mov ax, 0xCE
+   552 000004C1 50                      push ax
+   553 000004C2 E887FE                  call find_and_highlight
+   554                                  
+   555 000004C5 B8[2001]                mov ax, message
+   556 000004C8 50                      push ax
+   557 000004C9 A1[3501]                mov ax, [l4]
+   558 000004CC 50                      push ax
+   559 000004CD B8[3701]                mov ax, message2
+   560 000004D0 50                      push ax
+   561 000004D1 A1[5101]                mov ax, [l5]
+   562 000004D4 50                      push ax
+   563 000004D5 A1[5301]                mov ax, [foundC]
+   564 000004D8 50                      push ax
+   565 000004D9 E831FF                  call printNum
+   566                                  
+   567                                  exit:
+   568 000004DC B8004C                  mov ax, 0x4c00
+   569 000004DF CD21                    int 0x21

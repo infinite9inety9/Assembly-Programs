@@ -8,6 +8,11 @@ l2: dw 258
 scrollN: dw 0
 findString: db "three"
 l3: dw 5
+message: db "Total Matches Found: "
+l4: dw 21
+message2: db " | Viewport Status: ACTIVE"
+l5: dw 26
+foundC: dw 0
 
 clrscrn:
 push es
@@ -230,7 +235,7 @@ pop si
 pop bp
 ret 4
 
-scrollScreen:
+scroll_window_up:
 push bp
 mov bp, sp
 sub sp, 6
@@ -321,7 +326,7 @@ mov sp, bp
 pop bp
 ret 10
 
-findAndHighlight:
+find_and_highlight:
 push bp
 mov bp, sp
 push ax
@@ -355,14 +360,14 @@ leadingOk:
 jmp checkWord
 
 checkWord:
-mov di, findString
-mov cx, [l3]
+mov di, [bp+8]
+mov cx, [bp+6]
 push si
 repe cmpsb
 pop si
 jne nextChar
 mov bx, si
-add bx, [l3]
+add bx, [bp+6]
 mov al, [bx]
 cmp al, 'A'
 jb  trailingOk
@@ -398,9 +403,10 @@ add ax, bx
 mov di, ax
 push 0xb800
 pop es
-mov cx, [l3]
+mov cx, [bp+6]
 hlLoop:
-mov byte [es:di+1], 0CEh
+mov dl, [bp+4]
+mov byte [es:di+1], dl
 add di, 2
 inc bx
 cmp bx, 61
@@ -409,6 +415,7 @@ xor bx, bx
 add di, 38
 hlNoWrap:
 loop hlLoop
+add word [foundC], 1
 mov ax, ds
 mov es, ax
 
@@ -428,7 +435,75 @@ pop ax
 pop bp
 ret 6
 
+printNum:
+push bp
+mov bp, sp
+push ax
+push bx
+push cx
+push dx
+push si
+push di
+push es
+push ds
 
+mov ax, 0xb800
+mov es, ax
+xor di, di
+
+mov ax, 23
+mov bx, 80
+mul bx
+mov cx, 9
+add ax, cx
+shl ax, 1
+mov di, ax
+mov si, [bp+12]
+mov cx, [bp+10]
+mov ah, 0x07
+cld
+nextChar1:
+lodsb
+stosw
+loop nextChar1
+
+mov ax, [bp+4]
+mov bx, 10
+xor cx, cx
+pnDigits:
+xor dx, dx
+div bx
+push dx
+inc cx
+cmp ax, 0
+jne pnDigits
+pnEmit:
+pop dx
+add dl, '0'
+mov al, dl
+mov ah, 0x07
+stosw
+loop pnEmit
+
+mov si, [bp+8]
+mov cx, [bp+6]
+mov ah, 0x07
+cld
+nextChar2:
+lodsb
+stosw
+loop nextChar2
+
+pop ds
+pop es
+pop di
+pop si
+pop dx
+pop cx
+pop bx
+pop ax
+pop bp
+ret 10
 
 start:
 call clrscrn
@@ -467,7 +542,7 @@ mov ax, 8
 push ax
 mov ax, 3
 push ax
-call scrollScreen
+call scroll_window_up
 
 mov ax, findString
 push ax
@@ -475,7 +550,19 @@ mov ax, [l3]
 push ax
 mov ax, 0xCE
 push ax
-call findAndHighlight
+call find_and_highlight
+
+mov ax, message
+push ax
+mov ax, [l4]
+push ax
+mov ax, message2
+push ax
+mov ax, [l5]
+push ax
+mov ax, [foundC]
+push ax
+call printNum
 
 exit:
 mov ax, 0x4c00
